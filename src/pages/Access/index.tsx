@@ -4,6 +4,7 @@ import { Button } from 'antd';
 
 const AccessPage: React.FC = () => {
   const access = useAccess();
+
   return (
     <PageContainer
       ghost
