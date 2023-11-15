@@ -2,8 +2,8 @@ import SearchForm from '@/components/SearchForm';
 import { trim } from '@/utils/format';
 import { PageContainer } from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
-import { useEffect, useRef, useState } from 'react';
-import { handleError, initInnerLocalDevice } from './helper';
+import { useRef, useState } from 'react';
+import { handleError } from './helper';
 import styles from './index.less';
 import { ILocalDevice } from './type';
 
@@ -30,9 +30,9 @@ const HomePage: React.FC = () => {
     setLocalDevice(val);
   };
 
-  useEffect(() => {
-    initInnerLocalDevice(onSuccess);
-  }, [initInnerLocalDevice]);
+  // useEffect(() => {
+  //   initInnerLocalDevice(onSuccess);
+  // }, [initInnerLocalDevice]);
 
   const onSubmit = async () => {
     let stream = localdeRef.current.srcObject;
