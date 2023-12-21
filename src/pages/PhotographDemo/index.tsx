@@ -104,9 +104,13 @@ const PhotographDemo = () => {
       </Form>
       <video id="localVideo" ref={videoEle} autoPlay playsInline muted></video>
 
-      <div>
+      <div className="images-container">
         {imgList.map((item: string) => {
-          return <Image src={item} key="item" />;
+          return (
+            <div key={item} className="imageItem">
+              <Image src={item} />
+            </div>
+          );
         })}
       </div>
     </PageContainer>
