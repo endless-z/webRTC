@@ -18,6 +18,11 @@ const routes = [
     path: '/table',
     component: './Table',
   },
+  {
+    name: '拍照Demo',
+    path: '/photographDemo',
+    component: './PhotographDemo',
+  },
 ];
 
 export default routes;

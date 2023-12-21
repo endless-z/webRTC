@@ -91,7 +91,7 @@ function isString(input: unknown): input is string {
   return typeof input === 'string';
 }
 
-function foo2(input: string | number) {
+function foo6(input: string | number) {
   if (isString(input)) {
     // 正确了
     input.replace('linbudu', 'linbudu599');
