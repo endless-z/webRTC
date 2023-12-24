@@ -19,9 +19,21 @@ const routes = [
     component: './Table',
   },
   {
-    name: '拍照Demo',
-    path: '/photographDemo',
-    component: './PhotographDemo',
+    path: '/webRTC',
+    component: '@/layouts/index',
+    name: 'webRTC',
+    routes: [
+      {
+        path: '/webRTC/photographDemo',
+        name: '拍照Demo',
+        component: './PhotographDemo',
+      },
+      {
+        path: '/webRTC/shareScreen',
+        name: '屏幕共享',
+        component: './ShareScreen',
+      },
+    ],
   },
 ];
 

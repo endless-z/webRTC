@@ -21,7 +21,7 @@ export const layout: RunTimeLayoutConfig = () => {
     menu: {
       locale: false,
     },
-    title: 'WebRTC',
+    title: '音视频',
   };
 };
 
