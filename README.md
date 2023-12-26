@@ -4,7 +4,7 @@
 
 ### 1、什么是 WebRTC
 
-WebRTC（Web Real-Time Communications）是一项实时通讯技术，它允许网络应用或者站点，在不借助中间媒介的情况下，建立浏览器之间点对点（Peer-to-Peer）的连接，实现视频流和（或）音频流或者其他任意数据的传输。WebRTC 包含的这些标准使用户在无需安装任何插件或者第三方的软件的情况下，创建点对点（Peer-to-Peer）的数据分享和电话会议成为可能。
+WebRTC（Web Real-Time Communications）是一项实时通讯技术，它允许网络应用或者站点，在不借助中间媒介的情况下，建立浏览器之间点对点（Peer-to-Peer）的连接，实现视频流和（或）音频流或者其他任意数据的传输。WebRTC 包含的这些标准使用户在无需安装任何插件或者第三方的软件的情况下，创建点对点（Peer-to-Peer）的数据分享和电话会议成为可能。它通过使用浏览器内置的音频、视频和数据通道，实现了实时的音视频传输和数据传输.
 
 ### 2、WebRTC 的应用场景
 
@@ -20,13 +20,32 @@ WebRTC 的能力使其适用于各种实时通信场景：
 
 ### 3、WebRTC API
 
-WebRTC API a. getUserMedia 演示如何使用 getUserMedia 获取用户的摄像头和麦克风。 b. RTCPeerConnection 介绍 RTCPeerConnection，它是 WebRTC 中用于建立对等连接的主要 API。 c. RTCDataChannel 解释 RTCDataChannel，它允许在对等连接之间传输任意数据。
+WebRTC API
 
-- getUserMedia
+- getUserMedia 演示如何使用 getUserMedia 获取用户的摄像头和麦克风（MediaStream）
 
-- RTCPeerConnection
+- RTCPeerConnection 它是 WebRTC 中用于建立对等连接的主要 API（点对点通信）
 
-- RTCDataChannel
+- RTCDataChannel RTCDataChannel，它允许在对等连接之间传输任意数据（数据通信）
+
+#### 3.1 getUserMedia
+
+接受一个约束对象 constraints 作为参数，用来指定需要获取到什么样的媒体流。
+
+```
+
+navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+// 参数表示需要同时获取到音频和视频
+.then(stream => {
+  // 获取到优化后的媒体流
+  let video = document.querySelector('#rtc');
+  video.srcObject = stream;
+})
+.catch(err => {
+  // 捕获错误
+});
+
+```
 
 ### 4、实际应用和演示
 

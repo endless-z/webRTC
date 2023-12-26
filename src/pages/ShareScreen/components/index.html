@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <head>
+    <title>WebRTC 视频通话演示</title>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  </head>
+  <body>
+    <h1>WebRTC 视频通话演示</h1>
+    <div>
+      <p>我的peerId：<span id="myPid"></span></p>
+      <label for="remotePeerIdInput">对方 Peer ID:</label>
+      <input type="text" id="remotePeerIdInput" />
+      <button id="callButton">呼叫</button>
+      <button id="hangupButton">挂断</button>
+      <button id="muteButton">静音</button>
+      <button id="switchButton">切换摄像头</button>
+    </div>
+    <div style="display: flex">
+      <div style="background: aquamarine">
+        <h2>本地视频</h2>
+        <video
+          id="localVideo"
+          width="720"
+          height="240"
+          width="100%"
+          height="300"
+          preload="auto"
+          autoplay="autoplay"
+          x-webkit-airplay="true"
+          playsinline="true"
+          webkit-playsinline="true"
+          x5-video-player-type="h5"
+          x5-video-player-fullscreen="true"
+          x5-video-orientation="portraint"
+          muted
+        ></video>
+      </div>
+      <div style="background: bisque">
+        <h2>远程视频</h2>
+        <video id="remoteVideo" width="720" height="240" autoplay></video>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script>
+      let peer = null;
+      // 处理来自远程 Peer 的呼叫请求
+      let call;
+      let dataConn;
+      // 初始化摄像头方向为前置
+      let facingMode = 'user';
+      let localStream = null;
+      const localVideo = document.getElementById('localVideo');
+
+      const init = () => {
+        // 初始化 Peer 对象，指定唯一的 ID
+        peer = new Peer({
+          /* host: "xxxxxxxx",
+             path: "/peerjswss/myapp",
+             port: 443,
+             debug: 2,
+             secure: true,*/
+        });
+
+        // 输出 Peer ID 到控制台
+        peer.on('open', function (peerId) {
+          console.log('我的 Peer ID 是: ' + peerId);
+          document.getElementById('myPid').innerText = peerId;
+        });
+
+        peer.on('connection', (conn) => {
+          dataConn = conn;
+          conn.send('连接成功...............');
+          conn.on('data', function (data) {
+            console.log('被呼叫方-接收消息--》', data);
+            if (data === '挂断') {
+              console.log('被呼叫方信息——》对方挂断电话');
+              call.close();
+              call = null;
+              dataConn.close();
+              dataConn = null;
+              console.log('call', call);
+              console.log('dataConn', dataConn);
+              // 清空远程视频元素
+              const remoteVideo = document.getElementById('remoteVideo');
+              remoteVideo.srcObject = null;
+              alert('对方已挂断............');
+            }
+          });
+        });
+
+        peer.on('call', async (incomingCall) => {
+          console.log('监听呼叫');
+          // 如果已有呼叫正在进行中，则拒接新的呼叫
+          if (call && call.open) {
+            console.log('拒绝新的呼叫');
+            incomingCall.answer();
+            incomingCall.close();
+            return;
+          }
+
+          // 显示确认对话框，以便用户确定是否接听呼叫
+          const confirmed = window.confirm(
+            '来自 ' + incomingCall.peer + ' 的呼叫。是否接听？',
+          );
+          if (!confirmed) {
+            console.log('呼叫被用户拒绝');
+            incomingCall.answer();
+            incomingCall.close();
+            return;
+          }
+          await getUserMedia();
+          // 接听呼叫，并发送本地媒体流
+          console.log('接听呼叫');
+          call = incomingCall;
+          incomingCall.answer(localStream);
+
+          // 处理来自远程 Peer 的媒体流
+          incomingCall.on('stream', (remoteStream) => {
+            const remoteVideo = document.getElementById('remoteVideo');
+            remoteVideo.srcObject = remoteStream;
+          });
+
+          // 处理呼叫关闭事件
+          incomingCall.on('close', () => {
+            console.log('呼叫被远程 Peer 关闭');
+            if (call && call.open) {
+              console.log('关闭已有呼叫');
+              call.close();
+              call = null;
+            }
+            const remoteVideo = document.getElementById('remoteVideo');
+            remoteVideo.srcObject = null;
+          });
+        });
+      };
+
+      // 获取用户媒体流的函数，根据facingMode参数获取不同摄像头的流
+      function getUserMedia() {
+        return new Promise((resolve, reject) => {
+          // 检查浏览器是否支持 getUserMedia API
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('getUserMedia is not supported');
+            reject(new Error('getUserMedia is not supported'));
+          }
+          navigator.mediaDevices
+            .getUserMedia({
+              video: {
+                // enviroment 后置 | user 前置摄像头
+                facingMode: facingMode,
+                // 视频帧率
+                frameRate: 30,
+              },
+              audio: {},
+            })
+            .then((stream) => {
+              resolve(stream);
+              localStream = stream;
+              localVideo.srcObject = stream;
+
+              // 如果已经存在call，则需要将新的流替换到call中
+              if (call) {
+                console.log('---> ', call.peerConnection.getSenders());
+                stream.getVideoTracks().forEach((track) => {
+                  call.peerConnection.getSenders().forEach((sender) => {
+                    if (sender.track.kind === 'video') {
+                      sender
+                        .replaceTrack(track)
+                        .then(() => console.log('replace'));
+                    }
+                  });
+                });
+              }
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        });
+      }
+
+      // 切换摄像头的函数
+      function switchCamera() {
+        // 切换facingMode
+        facingMode = facingMode === 'user' ? 'environment' : 'user';
+        // 重新获取用户媒体流
+        getUserMedia();
+      }
+
+      // 在需要切换摄像头的地方调用switchCamera函数，例如：
+      const switchButton = document.getElementById('switchButton');
+      switchButton.addEventListener('click', switchCamera);
+
+      // 当点击“呼叫”按钮时，向远程 Peer 发起呼叫请求
+      const callButton = document.getElementById('callButton');
+      const remotePeerIdInput = document.getElementById('remotePeerIdInput');
+      callButton.addEventListener('click', async () => {
+        const remotePeerId = remotePeerIdInput.value.trim();
+        if (!remotePeerId) return;
+        await getUserMedia();
+        // 如果已有呼叫正在进行中，则关闭它，并发起新的呼叫请求
+        if (call && call.open) {
+          console.log('关闭已有呼叫');
+          call.close();
+        }
+        dataConn = peer.connect(remotePeerId);
+        dataConn.on('open', function () {
+          // Send messages
+          dataConn.send('我要给你打电话了............!');
+          // Receive messages
+          dataConn.on('data', function (data) {
+            console.log('呼叫方接收消息--》', data);
+            if (data === '挂断') {
+              console.log('呼叫方接收消息->对方挂断电话');
+              call.close();
+              call = null;
+              dataConn.close();
+              dataConn = null;
+              console.log('call', call);
+              console.log('dataConn', dataConn);
+              // 清空远程视频元素
+              const remoteVideo = document.getElementById('remoteVideo');
+              remoteVideo.srcObject = null;
+              alert('对方已挂断............');
+            }
+          });
+        });
+        // 创建新的呼叫请求，并注册事件监听器
+        console.log('发起呼叫', localStream);
+        call = peer.call(remotePeerId, localStream);
+        console.log('call-->', call);
+        // 处理来自远程 Peer 的媒体流
+        call.on('stream', (remoteStream) => {
+          const remoteVideo = document.getElementById('remoteVideo');
+          remoteVideo.srcObject = remoteStream;
+        });
+
+        // 处理呼叫关闭事件
+        call.on('close', () => {
+          console.log('呼叫被远程 Peer 关闭');
+          if (call && call.open) {
+            console.log('关闭已有呼叫');
+            call.close();
+            call = null;
+          }
+          const remoteVideo = document.getElementById('remoteVideo');
+          remoteVideo.srcObject = null;
+          // 停止本地媒体流
+          localStream.getTracks().forEach((track) => track.stop());
+          localVideo.srcObject = null;
+        });
+
+        // 处理呼叫错误事件
+        call.on('error', (error) => {
+          console.error('呼叫错误:', error);
+        });
+      });
+
+      // 当点击“挂断”按钮时，关闭呼叫并停止本地媒体流
+      const hangupButton = document.getElementById('hangupButton');
+      hangupButton.addEventListener('click', () => {
+        dataConn.send('挂断');
+        // 如果已有呼叫正在进行中，则关闭它
+        if (call && call.open) {
+          console.log('挂断呼叫');
+          call.close();
+          call = null;
+        }
+
+        // 停止本地媒体流
+        localStream.getTracks().forEach((track) => track.stop());
+        localVideo.srcObject = null;
+
+        // 清空远程视频元素
+        const remoteVideo = document.getElementById('remoteVideo');
+        remoteVideo.srcObject = null;
+      });
+
+      // 当点击“静音”按钮时，切换音频静音状态
+      const muteButton = document.getElementById('muteButton');
+      muteButton.addEventListener('click', () => {
+        const audioTracks = localStream.getAudioTracks();
+        audioTracks.forEach((track) => {
+          track.enabled = !track.enabled;
+        });
+        muteButton.innerText = audioTracks[0].enabled ? '静音' : '取消静音';
+      });
+
+      init();
+    </script>
+  </body>
+</html>

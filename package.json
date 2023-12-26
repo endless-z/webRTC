@@ -4,6 +4,7 @@
   "scripts": {
     "build": "max build",
     "dev": "max dev",
+    "dev-back": "cd ./src/packages/Backend && node ./app.ts",
     "format": "prettier --cache --write .",
     "postinstall": "max setup",
     "prepare": "husky install",
@@ -14,7 +15,10 @@
     "@ant-design/icons": "^5.0.1",
     "@ant-design/pro-components": "^2.4.4",
     "@umijs/max": "^4.0.87",
-    "antd": "^5.4.0"
+    "antd": "^5.4.0",
+    "koa": "^2.14.2",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
   },
   "devDependencies": {
     "@types/react": "^18.0.33",
