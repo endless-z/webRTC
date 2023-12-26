@@ -1,3 +1,6 @@
+/**
+ * 返回最新值
+ */
 import { useRef } from 'react';
 
 const useLatest = <T>(value: T): { readonly current: T } => {
