@@ -33,6 +33,11 @@ const routes = [
         name: '屏幕共享',
         component: './ShareScreen',
       },
+      {
+        path: '/webRTC/videoCall',
+        name: '1V1视频通话',
+        component: './VideoCall',
+      },
     ],
   },
 ];

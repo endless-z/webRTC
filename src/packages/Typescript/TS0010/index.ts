@@ -54,4 +54,21 @@ type FactoryT<T = boolean> = T | number | string;
  *
  *
  *
+ * Git Flow 工作流
+ *
+ * 开发 develop-----> feature/xxxx ----> PR ---> develop   打tag v0.0.1.develop
+ * 测试 feature/xxx ----> release/20231228 ---- PR ---->   release 打 tag v0.0.1.release
+ *
+ * 热修复  origin/release 对应测试环境
+ *
+ * origin/release ---> release_hotfix_gx ---PR --- release 打 tag v0.0.2.release
+ *
+ * 开发分支也有bug  此时也需要 将 release_hotfix_gx ---> delelop 开发分支
+ *
+ *
+ * 生产发布
+ *
+ * 完成release版本的提测工作、BUG修复工作后  需要将release分支的版本发布到master上，完成生产环境版本的发布
+ *
+ *
  */

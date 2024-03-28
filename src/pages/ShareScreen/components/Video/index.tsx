@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 const VideoStream = () => {
   const myVideoRef = useRef<HTMLVideoElement>(null);
@@ -13,9 +13,9 @@ const VideoStream = () => {
     (myVideoRef.current as any).srcObject = myVideoStream.current!;
   };
 
-  // useEffect(() => {
-  //   init();
-  // }, []);
+  useEffect(() => {
+    // init();
+  }, []);
 
   return <video ref={myVideoRef} width="300" height="300" autoPlay muted />;
 };
